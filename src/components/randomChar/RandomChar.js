@@ -21,7 +21,7 @@ class RandomChar extends Component {
     }
 
     componentWillUnmount() {
-        // clearInterval(this.timerId);
+        clearInterval(this.timerId);
     }
 
     onCharLoaded = (char) => {
@@ -34,6 +34,8 @@ class RandomChar extends Component {
 
     updateChar = () => {
         this.setState({ error: false });
+        this.setState({ loading: true });
+
         const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011100);
         this.marvelService
             .getCharacter(id)
@@ -88,8 +90,8 @@ const View = ({ char }) => {
                 style={{
                     objectFit: `${
                         thumbnail.includes("image_not_available", 0)
-                            ? "contain"
-                            : "cover"
+                            ? "unset"
+                            : "contain"
                     }`,
                 }}
             />

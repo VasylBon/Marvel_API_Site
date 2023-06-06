@@ -1,40 +1,59 @@
 import { Component } from "react/cjs/react.production.min";
 
-import "./charList.scss";
 import MarvelService from "../../services/MarvelService";
+import ErrorMessage from "../errorMessage/ErrorMessage";
+import Loader from "../loader/Loader";
+
+import "./charList.scss";
 
 class CharList extends Component {
     state = {
         characters: [],
+        loading: true,
+        error: false,
     };
 
     marvelService = new MarvelService();
 
     componentDidMount() {
-        this.updateChar();
-    }
-
-    onCharLoaded = (characters) => {
-        this.setState({ characters });
-    };
-
-    updateChar = () => {
         this.marvelService
             .getAllCharacters()
-            .then(this.onCharLoaded)
-            .catch((error) => {
-                console.error("Error loading characters:", error);
-            });
+            .then(this.onCharListLoaded)
+            .catch(this.onError);
+    }
+
+    onCharListLoaded = (characters) => {
+        this.setState({
+            characters,
+            loading: false,
+        });
+    };
+
+    onError = () => {
+        this.setState({
+            error: true,
+            loading: false,
+        });
     };
 
     render() {
-        const { characters } = this.state;
+        const { characters, loading, error } = this.state;
+
+        const errorMessage = error ? <ErrorMessage /> : null;
+        const loader = loading ? <Loader /> : null;
 
         return (
             <div className="char__list">
+                {errorMessage}
+                {loader}
+
                 <ul className="char__grid">
                     {characters.map((character) => (
-                        <li className="char__item" key={character.name}>
+                        <li
+                            className="char__item"
+                            key={character.id}
+                            onClick={() => this.props.onCharSelected(character.id)}
+                        >
                             <img
                                 src={character.thumbnail}
                                 alt={character.name}
@@ -44,7 +63,7 @@ class CharList extends Component {
                                             "image_not_available",
                                             0,
                                         )
-                                            ? "contain"
+                                            ? "unset"
                                             : "cover"
                                     }`,
                                 }}
@@ -53,10 +72,7 @@ class CharList extends Component {
                         </li>
                     ))}
                 </ul>
-                <button
-                    className="button button__main button__long"
-                    onClick={this.updateChar}
-                >
+                <button className="button button__main button__long">
                     <div className="inner">load more</div>
                 </button>
             </div>
