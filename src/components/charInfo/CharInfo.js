@@ -1,4 +1,5 @@
 import { Component } from "react/cjs/react.production.min";
+import PropTypes from "prop-types";
 
 import "./charInfo.scss";
 import MarvelService from "../../services/MarvelService";
@@ -107,6 +108,7 @@ const View = ({ char }) => {
                     ? null
                     : "This character was never mentioned in the comics"}
                 {comics.map((item, i) => {
+                    // eslint-disable-next-line
                     if (i < 10) {
                         return (
                             <li key={i} className="char__comics-item">
@@ -118,6 +120,10 @@ const View = ({ char }) => {
             </ul>
         </>
     );
+};
+
+CharInfo.propTypes = {
+    charId: PropTypes.number,
 };
 
 export default CharInfo;
