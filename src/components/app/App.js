@@ -1,7 +1,20 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
-import { MainPage, ComicsPage, Page404, SingleComicPage } from "../pages";
 import AppHeader from "../appHeader/AppHeader";
+import Loader from "../loader/Loader";
+
+const Page404 = lazy(() => import("../pages/404"));
+const MainPage = lazy(() => import("../pages/MainPage"));
+const ComicsPage = lazy(() => import("../pages/ComicsPage"));
+
+const SingleComicLayout = lazy(() =>
+    import("../pages/singleComicLayout/SingleComicLayout"),
+);
+const SingleCharacterLayout = lazy(() =>
+    import("../pages/singleCharacterLayout/SingleCharacterLayout"),
+);
+const SinglePage = lazy(() => import("../pages/SinglePage"));
 
 const App = () => {
     return (
@@ -9,16 +22,43 @@ const App = () => {
             <div className="app">
                 <AppHeader />
                 <main>
-                    <Routes>
-                        <Route exact path="/" element={<MainPage />}></Route>
-                        <Route exact path="/comics" element={<ComicsPage />}></Route>
-                        <Route
-                            exact
-                            path="/comics/:comicId"
-                            element={<SingleComicPage />}
-                        ></Route>
-                        <Route path="*" element={<Page404 />}></Route>
-                    </Routes>
+                    <Suspense fallback={<Loader />}>
+                        <Switch>
+                            <Route
+                                exact
+                                path="/"
+                            >
+                                <MainPage />
+                            </Route>
+                            <Route
+                                exact
+                                path="/comics"
+                            >
+                                <ComicsPage />
+                            </Route>
+                            <Route
+                                exact
+                                path="/comics/:id"
+                            >
+                                <SinglePage
+                                    Component={SingleComicLayout}
+                                    dataType="comic"
+                                />
+                            </Route>
+                            <Route
+                                exact
+                                path="/characters/:id"
+                            >
+                                <SinglePage
+                                    Component={SingleCharacterLayout}
+                                    dataType="character"
+                                />
+                            </Route>
+                            <Route path="*">
+                                <Page404 />
+                            </Route>
+                        </Switch>
+                    </Suspense>
                 </main>
             </div>
         </Router>
