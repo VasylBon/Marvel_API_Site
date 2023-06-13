@@ -3,14 +3,12 @@ import PropTypes from "prop-types";
 
 import "./charInfo.scss";
 import useMarvelService from "../../services/MarvelService";
-import Loader from "../loader/Loader";
-import ErrorMessage from "../errorMessage/ErrorMessage";
-import Skeleton from "../skeleton/Skeleton";
+import setContent from "../../utils/setContent";
 
 const CharInfo = (props) => {
     const [char, setChar] = useState(null);
 
-    const { loading, error, getCharacter, clearError } = useMarvelService();
+    const { getCharacter, clearError, process, setProcess } = useMarvelService();
 
     useEffect(() => {
         updateChar();
@@ -23,30 +21,20 @@ const CharInfo = (props) => {
         }
 
         clearError();
-        getCharacter(charId).then(onCharLoaded);
+        getCharacter(charId)
+            .then(onCharLoaded)
+            .then(() => setProcess("confirmed"));
     };
 
     const onCharLoaded = (char) => {
         setChar(char);
     };
 
-    const skeleton = char || loading || error ? null : <Skeleton />;
-    const errorMessage = error ? <ErrorMessage /> : null;
-    const loaded = loading ? <Loader /> : null;
-    const content = !(loading || error || !char) ? <View char={char} /> : null;
-
-    return (
-        <div className="char__info">
-            {skeleton}
-            {errorMessage}
-            {loaded}
-            {content}
-        </div>
-    );
+    return <div className="char__info">{setContent(process, View, char)}</div>;
 };
 
-const View = ({ char }) => {
-    const { name, description, thumbnail, homepage, wiki, comics } = char;
+const View = ({ data }) => {
+    const { name, description, thumbnail, homepage, wiki, comics } = data;
 
     return (
         <>
@@ -65,10 +53,16 @@ const View = ({ char }) => {
                 <div>
                     <div className="char__info-name">{name}</div>
                     <div className="char__btns">
-                        <a href={homepage} className="button button__main">
+                        <a
+                            href={homepage}
+                            className="button button__main"
+                        >
                             <div className="inner">homepage</div>
                         </a>
-                        <a href={wiki} className="button button__secondary">
+                        <a
+                            href={wiki}
+                            className="button button__secondary"
+                        >
                             <div className="inner">Wiki</div>
                         </a>
                     </div>
@@ -84,7 +78,10 @@ const View = ({ char }) => {
                     // eslint-disable-next-line
                     if (i < 10) {
                         return (
-                            <li key={i} className="char__comics-item">
+                            <li
+                                key={i}
+                                className="char__comics-item"
+                            >
                                 {item.name}
                             </li>
                         );
